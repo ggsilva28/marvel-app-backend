@@ -1,52 +1,45 @@
 import { prismaClient } from "../prisma"
-import { sign } from "jsonwebtoken"
 
 interface IUser {
     name: string
-    email: string
-    password: string
+    birth: string
+    phone: string
 }
 
 class UserService {
 
     async get(user_id: string) {
-        const user = await prismaClient.user.findFirst({
-            where: {
-                id: user_id
-            }
-        })
-
-        return user;
-    }
-
-    async create(data: IUser) {
-        const { name, email, password } = data;
-
         try {
-            const user = await prismaClient.user.create({
-                data: { name, email, password }
+            const user = await prismaClient.user.findFirst({
+                where: {
+                    id: user_id
+                }
             })
 
-            const token = sign(
-                {
-                    user: {
-                        name: user.name,
-                        email: user.email,
-                        id: user.id
-                    }
-                }
-                , process.env.JWT_SECRET,
-                {
-                    subject: user.id,
-                    expiresIn: '1d'
-                }
-            )
-
-            return { user, token };
+            return user;
         } catch (err) {
-            throw err;
+            throw new Error('user.not_found')
         }
+    }
 
+    async add(data: IUser) {
+        try {
+            const user = await prismaClient.user.create({
+                data: data
+            })
+            return user;
+        } catch (err) {
+            throw new Error(err.toString())
+        }
+    }
+
+    async delete(user_id) {
+        try {
+            await prismaClient.delete(user_id)
+            return true;
+        } catch (err) {
+            throw new Error(err.toString())
+        }
     }
 
 }
