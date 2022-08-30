@@ -3,43 +3,67 @@ import { UserService } from "../services/UserService"
 
 class UserController {
 
-    async profile(request: Request, response: Response) {
-        const { user_id } = request;
-
-        const service = new UserService()
-
-        const result = await service.get(user_id)
-
-        return response.json({
-            code: 200,
-            message: 'user.get',
-            data: result
-        })
-    }
-
-    async create(request: Request, response: Response) {
-        const { name, email, password } = request.body;
-
+    async add(request: Request, response: Response) {
+        const { name, birth, phone } = request.body;
         const service = new UserService()
 
         try {
-            const result = await service.create({ name, email, password })
-            return response.json({
+            const result = await service.add({ name, birth, phone })
+
+            return response.status(200).json({
                 code: 200,
-                message: 'user.created',
+                message: 'user.add',
                 data: result
             })
-            
         } catch (err) {
-
-            return response.json({
+            return response.status(400).json({
                 code: 400,
-                error: 'user.not_created',
-                data: err
+                error: err
             })
         }
-
     }
+
+    async get(request: Request, response: Response) {
+        const { user_id } = request;
+        const service = new UserService()
+
+        try {
+            const result = await service.get(user_id)
+
+            return response.status(200).json({
+                code: 200,
+                message: 'user.found',
+                data: result
+            })
+        } catch (err) {
+            return response.status(400).json({
+                code: 400,
+                error: err
+            })
+        }
+    }
+
+    async delete(request: Request, response: Response) {
+        const { user_id } = request;
+        const service = new UserService()
+
+        try {
+            await service.delete(user_id)
+
+            return response.status(200).json({
+                code: 200,
+                message: 'user.deleted',
+                data: {},
+            })
+        } catch (err) {
+            return response.status(400).json({
+                code: 400,
+                error: err
+            })
+        }
+    }
+
+
 }
 
 export { UserController }
